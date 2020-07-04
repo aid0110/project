@@ -102,9 +102,25 @@ public class FragSearch extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                 //클릭한 아이템의 문자열을 가져옴
-                String i = "2"; //영양제 결정 코드
-                InsertData insertData = new InsertData();
-                insertData.execute("http://" + IP_ADDRESS + "/insertdose.php", userID, d_date, i);
+                //String i = "2"; //영양제 결정 코드
+                Object vo = (Object)adapterView.getAdapter().getItem(position);
+                if(vo == null){
+                    Log.d(TAG,"값이 비어이ㅣㅆ음");
+                }else{
+                    String str = vo.toString();
+                    //String target = "n_code";
+                    //int target_num = str.indexOf(target);
+                   // String result = str.substring(target_num,(str.substring(target_num).indexOf("=")+target_num));
+                    String[] array = str.split(",");
+                    String string = array[2];
+
+                    String[] arraylast = string.split("=");
+                    String need = arraylast[1];
+                      InsertData insertData = new InsertData();
+                      insertData.execute("http://" + IP_ADDRESS + "/insertdose.php", userID, d_date,need);
+
+                }
+
             }
         });
 
