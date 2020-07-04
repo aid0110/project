@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".activity_setting">
+<TextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="알림설정"
+    android:layout_margin="10dp"/>
+
+    <Switch
+        android:id="@+id/switch1"
+        android:layout_width="270dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:text="알림" />
+
+    <Switch
+        android:id="@+id/switch2"
+        android:layout_width="270dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:text="방해금지 시간설정" />
+
+    <Switch
+        android:id="@+id/switch3"
+        android:layout_width="270dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:text="진동" />
+<TextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="시스템 정보"
+    android:layout_margin="10dp"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="버전 0.0.1"
+        android:layout_margin="10dp"/>
+    <TextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="제작자 : 김진주, 허지원"
+    android:layout_margin="10dp"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="2020 졸업작품"
+        android:layout_margin="10dp"/>
+</LinearLayout>

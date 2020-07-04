@@ -16,13 +16,13 @@ public class RegisterRequest extends StringRequest {
     private Map<String, String> parameters;
 
     //생성자
-    public RegisterRequest(String userID, String userPassword, String userName, int userage, Response.Listener<String> listener){
+    public RegisterRequest(String userID, String userPassword, String userName, String userage, Response.Listener<String> listener){
         super(Method.POST, URL, listener, null);
         parameters = new HashMap<>();
         parameters.put("userID", userID);
         parameters.put("userPassword", userPassword);
         parameters.put("userName", userName);
-        parameters.put("userage", userage+"");
+        parameters.put("userage", userage);
 
     }
 

@@ -1,41 +1,45 @@
 package com.example.ui_02;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Intent;
+import android.app.ProgressDialog;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
+import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
-
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.toolbox.Volley;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import android.widget.TextView;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 
 public class activity_register extends AppCompatActivity {
-    private EditText et_name;
-    private EditText et_Id;
-    private EditText et_Pw;
-    private EditText et_Age;
-
+    private EditText et_name, et_Id, et_Pw, et_Age;
+    private static String IP_ADDRESS = "192.168.0.61";
+    private static String TAG = "phptest";
+    private TextView mTextViewResult;
     private Button btn_ok;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        btn_ok = (Button)findViewById(R.id.btn_ok);
-        et_name = (EditText)findViewById(R.id.et_name);
+        btn_ok = (Button) findViewById(R.id.btn_ok);
+        et_name = (EditText) findViewById(R.id.et_name);
         et_Id = (EditText) findViewById(R.id.et_id);
         et_Pw = (EditText) findViewById(R.id.et_pw);
         et_Age = (EditText) findViewById(R.id.et_age);
+        mTextViewResult = (TextView) findViewById(R.id.mTextViewResult);
+
+        mTextViewResult.setMovementMethod(new ScrollingMovementMethod());
 
         btn_ok.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -43,67 +47,86 @@ public class activity_register extends AppCompatActivity {
                 String userID = et_Id.getText().toString();
                 String userPassword = et_Pw.getText().toString();
                 String userName = et_name.getText().toString();
-                int userAge = Integer.parseInt(et_Age.getText().toString());
+                String userAge = et_Age.getText().toString();
 
+                InsertData task = new InsertData();
+                task.execute("http://" + IP_ADDRESS + "/insert.php", userID, userPassword, userName, userAge);
+                et_Id.setText("");
+                et_Pw.setText("");
+                et_name.setText("");
+                et_Age.setText("");
 
-                //4. 콜백 처리부분(volley 사용을 위한 ResponseListener 구현 부분)
+            }
+        });
+    }
+    class InsertData extends AsyncTask<String, Void, String>{
+        ProgressDialog progressDialog;
 
-                Response.Listener<String> responseListener = new Response.Listener<String>(){
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressDialog = ProgressDialog.show(activity_register.this, "Please Wait",null,true,true);
+        }
 
-                    //서버로부터 여기서 데이터를 받음
-                    @Override
-                    public void onResponse(String response) {
-                        try {
-                            //서버로부터 받는 데이터는 JSON타입의 객체이다.
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+            progressDialog.dismiss();
+            mTextViewResult.setText(result);
+            Log.d(TAG,"POST response - "+result);
+        }
 
-                            JSONObject jsonResponse = new JSONObject(response);
+        @Override
+        protected String doInBackground(String... params) {
+            String userID = (String)params[1];
+            String userPassword = (String)params[2];
+            String userName = (String)params[3];
+            String userAge = (String)params[4];
 
-                            //그중 Key값이 “success”인 것을 가져온다.
+            String serverURL = (String)params[0];
+            String postParameters = "userID=" + userID + "&userPassword=" + userPassword + "&userName=" + userName + "&userAge=" + userAge;
 
-                            boolean success = jsonResponse.getBoolean("success");
+            try {
 
-                            //회원 가입 성공시 success값이 true임
+                URL url = new URL(serverURL);
+                HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
 
-                            if(success){
+                httpURLConnection.setReadTimeout(5000);
+                httpURLConnection.setConnectTimeout(5000);
+                httpURLConnection.setRequestMethod("POST");
+                httpURLConnection.connect();
 
-                                Toast.makeText(getApplicationContext(), "success", Toast.LENGTH_SHORT).show();
+                OutputStream outputStream = httpURLConnection.getOutputStream();
+                outputStream.write(postParameters.getBytes("UTF-8"));
+                outputStream.flush();
+                outputStream.close();
 
-                                //알림상자를 만들어서 보여줌
-                                AlertDialog.Builder builder = new AlertDialog.Builder(activity_register.this);
-                                builder.setMessage("회원가입 성공")
-                                .setPositiveButton("ok", null)
-                                        .create()
-                                        .show();
-                                //그리고 첫화면으로 돌아감
-                                Intent intent = new Intent(activity_register.this, activity_login.class);
-                                activity_register.this.startActivity(intent);
-                            }
-                            //회원 가입 실패시 success값이 false임
-                            else{
-                                Toast.makeText(getApplicationContext(), "fail", Toast.LENGTH_SHORT).show();
-                                //알림상자를 만들어서 보여줌
-                                AlertDialog.Builder builder = new AlertDialog.Builder(activity_register.this);
-                                builder.setMessage("실패")
-                                        .setNegativeButton("ok", null)
-                                        .create()
-                                        .show();
-                            }
-                        }catch(JSONException e){
-                            e.printStackTrace();
-                        }
-                    }
-                };//responseListener 끝
+                int responseStatusCode = httpURLConnection.getResponseCode();
+                Log.d(TAG, "POST response code - " + responseStatusCode);
 
-                //volley 사용법
-                //1. RequestObject를 생성한다. 이때 서버로부터 데이터를 받을 responseListener를 반드시 넘겨준다.
-                RegisterRequest registerRequest = new RegisterRequest(userID, userPassword, userName, userAge, responseListener);
-                //2. RequestQueue를 생성한다.
-                RequestQueue queue = Volley.newRequestQueue(activity_register.this);
-                //3. RequestQueue에 RequestObject를 넘겨준다.
-                queue.add(registerRequest);
+                InputStream inputStream;
+                if(responseStatusCode == HttpURLConnection.HTTP_OK) {
+                    inputStream = httpURLConnection.getInputStream();
+                }
+                else{
+                    inputStream = httpURLConnection.getErrorStream();
+                }
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream, "UTF-8");
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                StringBuilder sb = new StringBuilder();
+                String line = null;
+                while((line = bufferedReader.readLine()) != null){
+                    sb.append(line);
+                }
+                bufferedReader.close();
+                return sb.toString();
+
+            } catch (Exception e) {
+                Log.d(TAG, "InsertData: Error ", e);
+                return new String("Error: " + e.getMessage());
             }
 
-        });
+        }
     }
 
 }

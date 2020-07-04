@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.google.android.material.tabs.TabLayout;
@@ -23,6 +24,14 @@ public class MainActivity extends AppCompatActivity {
 
         //탭레이아웃도 껴주기(하면 뷰페이저 세팅 완료)
         tabLayout.setupWithViewPager(viewPager);
+
+        //로그인 액티비티에서 값을 가져오는 부분
+        Intent intent = getIntent();
+        String userID = intent.getStringExtra("userID");
+        String userPassword = intent.getStringExtra("userPassword");
+
+        UserInfo.setUserID(userID);
+        UserInfo.setUserPassword(userPassword);
 
     }
 }
